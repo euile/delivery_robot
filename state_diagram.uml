@@ -1,0 +1,15 @@
+@startuml
+scale 600 width
+[*] -> Start
+Start --> To_Dispenser : Command_tg
+To_Dispenser --> Rotate_and_Move : angle_and_dist()
+Rotate_and_Move --> To_Dispenser
+To_Dispenser --> Delivery : State_drink()
+Delivery --> Rotate_and_Move : State_drink()
+Rotate_and_Move --> Delivery
+Go_to_start --> Delivery
+Delivery --> Go_to_start : !State_drink()
+Go_to_start --> Rotate_and_Move : angle_and_dist()
+Rotate_and_Move --> Go_to_start : angle_and_dist()
+Go_to_start --> Start
+@enduml
