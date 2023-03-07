@@ -4,17 +4,17 @@ using namespace std;
 
 class Sender {
     void CMD_Rotate_and_Move(int a, int d) {
-        cout << "Ïîâîðîò íà " << a << "ãðàäóñîâ" << endl;
-        cout << "Äâèæåíèå íà " << d << "ñì" << endl;
+        cout << "ÐŸÐ¾Ð²Ð¾Ñ€Ð¾Ñ‚ Ð½Ð° " << a << "Ð³Ñ€Ð°Ð´ÑƒÑÐ¾Ð²" << endl;
+        cout << "Ð”Ð²Ð¸Ð¶ÐµÐ½Ð¸Ðµ Ð½Ð° " << d << "ÑÐ¼" << endl;
     }
     void CMD_Get_drink() {
-        cout << "Íàïèòîê ïîëó÷åí" << endl;
+        cout << "ÃÃ Ã¯Ã¨Ã²Ã®Ãª Ã¯Ã®Ã«Ã³Ã·Ã¥Ã­" << endl;
     }
     void CMD_Give_drink() {
-        cout << "Íàïèòîê äîñòàâëåí" << endl;
+        cout << "ÃÐÐ°Ð¿Ð¸Ñ‚Ð¾Ðº Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½" << endl;
     }
     void CMD_Start_point() {
-        cout << "Ðîáîò â ñòàðòîâîì ïîëîæåíèè" << endl;
+        cout << "ÃÃ®Ã¡Ã®Ã² Ã¢ Ã±Ã²Ã Ã°Ã²Ã®Ã¢Ã®Ã¬ Ã¯Ã®Ã«Ã®Ã¦Ã¥Ã­Ã¨Ã¨" << endl;
     }
 };
 
@@ -97,6 +97,7 @@ void ProcessFiniteAutomat()
 
 int main()
 {
+    setlocale(LC_ALL, "Rus");
 
     
     return 0;
