@@ -1,4 +1,0 @@
-@startuml
-:Student: --> (Сhoose a drink)
-:Student: --> (Drink)
-@enduml
