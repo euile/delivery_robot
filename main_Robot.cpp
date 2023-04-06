@@ -1,5 +1,6 @@
 #include "opencv2/opencv.hpp"
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 using namespace cv;
@@ -37,10 +38,11 @@ public:
 
 int main(int argc, char **argv) {
 
-  //char mainWindow[] = "Main";
+    //char mainWindow[] = "Main";
 	//char trackbarWindow_blue[] = "Trackbar_pink";
 	char thresholdWindow_pink[] = "Threshold_pink";
     char thresholdWindow_blue[] = "Threshold_blue";
+    char thresholdWindow_red[] = "Threshold_red";
 	int min = 0, max = 1000;
 	int pink_hmin = 157, pink_smin = 119, pink_vmin = 187,
 		pink_hmax = 186, pink_smax = 200, pink_vmax = 255;
@@ -48,7 +50,10 @@ int main(int argc, char **argv) {
     int blue_hmin = 92, blue_smin = 221, blue_vmin = 156,
 		blue_hmax = 118, blue_smax = 255, blue_vmax = 207;
 
-	Mat frame, HSV, threshold_pink, threshold_blue, blurred;
+    int red_hmin = 0, red_smin = 91, red_vmin = 147,
+		red_hmax = 18, red_smax = 200, red_vmax = 255;
+
+	Mat frame, HSV, threshold_pink, threshold_blue, threshold_red, blurred;
 
 
     // If the input is the web camera, pass 0 instead of the video file name
@@ -56,9 +61,10 @@ int main(int argc, char **argv) {
 
     //Создаем окна
 	//namedWindow(mainWindow, 0); хз зачем это окно
-	namedWindow(trackbarWindow_blue, 0);
+	//namedWindow(trackbarWindow_blue, 0);
 	namedWindow(thresholdWindow_pink, 0);
     namedWindow(thresholdWindow_blue, 0);
+    namedWindow(thresholdWindow_red, 0);
 
     /*Создаем трэкбар для регулирования цвета*/
     /*
@@ -71,7 +77,7 @@ int main(int argc, char **argv) {
     createTrackbar("Size min:", trackbarWindow_pink, &min, max);
     createTrackbar("Size max:", trackbarWindow_pink, &max, max);
     */
-   /*
+    /*
     createTrackbar("H min:", trackbarWindow_blue, &blue_hmin, blue_hmax);
     createTrackbar("H max:", trackbarWindow_blue, &blue_hmax, blue_hmax);
     createTrackbar("S min:", trackbarWindow_blue, &blue_smin, blue_smax);
@@ -104,7 +110,11 @@ int main(int argc, char **argv) {
 
         int Xc_blue = 0;
         int Yc_blue = 0;
-        int counter_blue = 0; // счётчик числа белых пикселей (pink)
+        int counter_blue = 0; // счётчик числа белых пикселей (blue)
+
+        int Xc_red = 0;
+        int Yc_red = 0;
+        int counter_red = 0; // счётчик числа белых пикселей (red)
 
         cvtColor(frame, HSV, COLOR_BGR2HSV);
         medianBlur(HSV, blurred, 21);
@@ -151,15 +161,46 @@ int main(int argc, char **argv) {
                 }
             }
         }
+
+        inRange(blurred, Scalar(red_hmin, red_smin, red_vmin), Scalar(red_hmax, red_smax, red_vmax), threshold_red);
+        for(int y = 0; y < threshold_red.rows; y++){
+		    for(int x = 0; x < threshold_red.cols; x++){
+			    int value = threshold_red.at<uchar>(y, x);
+			    if(value == 255){
+				    Rect rect;
+				    int count = floodFill(threshold_red, Point(x, y), Scalar(200), &rect);
+                    /* а че это они тут вместе считаются? м? почему координаты двух цветов считаются вместе? думайте!  */
+                    
+                    Xc_red += x;
+                    Yc_red += y;
+                    counter_red++;
+				    if(rect.width >= min && rect.width <= max
+					    && rect.height >= min && rect.height <= max)
+                    {
+					    rectangle(frame, rect, Scalar(255, 255, 0, 4));
+                    }
+                }
+            }
+        }
+
         /*
         cout << pink_hmin << ' ' << pink_hmax << ' ' << pink_smin <<' ' << pink_smax << ' ' << pink_vmin << ' ' << pink_vmax << endl;
         cout << blue_hmin << ' ' << blue_hmax << ' ' << blue_smin << ' ' << blue_smax << ' ' << blue_vmin << ' ' << blue_vmax << endl;
         */
 
-        if (counter_pink != 0 || counter_blue != 0)
+        if (counter_pink != 0 && counter_blue != 0 && counter_red != 0)
         {
-            cout << "Центр X: " << double(Xc_pink) / counter_pink  << ' ' << double(Xc_blue) / counter_blue << endl; 
-            cout << "Центр Y: " << double(Yc_pink) / counter_pink << ' ' << double(Yc_blue) / counter_blue << endl;
+            double x1 = double(Xc_pink) / counter_pink - double(Xc_blue) / counter_blue; // Px - Bx
+            double x2 = double(Xc_red) / counter_red - double(Xc_blue) / counter_blue; // Rx - Bx
+            double y1 = double(Yc_pink) / counter_pink - double(Yc_blue) / counter_blue; // Py - By
+            double y2 = double(Yc_red) / counter_red - double(Yc_blue) / counter_blue; // Ry - By
+
+            double BP = sqrt(x1 * x1 + y1 * y1);
+            double BR = sqrt(x2 * x2 + y2 * y2);
+            double argument = (x1 * x2 + y1 * y2) / (BR * BP);
+            cout << "Угол поворота: " << acos(argument) << endl;
+            //cout << "Центр X: " << double(Xc_pink) / counter_pink  << ' ' << double(Xc_blue) / counter_blue << ' ' << double(Xc_red) / counter_red << endl; 
+            //cout << "Центр Y: " << double(Yc_pink) / counter_pink << ' ' << double(Yc_blue) / counter_blue  << ' ' << double(Yc_red) / counter_red << endl;
         }
         
 
@@ -167,6 +208,7 @@ int main(int argc, char **argv) {
         imshow("Frame", frame);
         imshow(thresholdWindow_pink, threshold_pink);
         imshow(thresholdWindow_blue, threshold_blue);
+        imshow(thresholdWindow_red, threshold_red);
         // Press  ESC on keyboard to exit
         char c = (char)waitKey(25);
         if (c == 27)
