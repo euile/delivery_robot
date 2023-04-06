@@ -35,34 +35,33 @@ public:
 };
 
 
-
 int main(int argc, char **argv) {
 
     //char mainWindow[] = "Main";
-	//char trackbarWindow_blue[] = "Trackbar_pink";
-	char thresholdWindow_pink[] = "Threshold_pink";
+    //char trackbarWindow_blue[] = "Trackbar_pink";
+    char thresholdWindow_pink[] = "Threshold_pink";
     char thresholdWindow_blue[] = "Threshold_blue";
     char thresholdWindow_red[] = "Threshold_red";
-	int min = 0, max = 1000;
-	int pink_hmin = 157, pink_smin = 119, pink_vmin = 187,
-		pink_hmax = 186, pink_smax = 200, pink_vmax = 255;
+    int min = 0, max = 1000;
+    int pink_hmin = 157, pink_smin = 119, pink_vmin = 187,
+	pink_hmax = 186, pink_smax = 200, pink_vmax = 255;
 
     int blue_hmin = 92, blue_smin = 221, blue_vmin = 156,
-		blue_hmax = 118, blue_smax = 255, blue_vmax = 207;
+	blue_hmax = 118, blue_smax = 255, blue_vmax = 207;
 
     int red_hmin = 0, red_smin = 91, red_vmin = 147,
-		red_hmax = 18, red_smax = 200, red_vmax = 255;
+	red_hmax = 18, red_smax = 200, red_vmax = 255;
 
-	Mat frame, HSV, threshold_pink, threshold_blue, threshold_red, blurred;
+    Mat frame, HSV, threshold_pink, threshold_blue, threshold_red, blurred;
 
 
     // If the input is the web camera, pass 0 instead of the video file name
     VideoCapture cap(0);
 
     //Создаем окна
-	//namedWindow(mainWindow, 0); хз зачем это окно
-	//namedWindow(trackbarWindow_blue, 0);
-	namedWindow(thresholdWindow_pink, 0);
+    //namedWindow(mainWindow, 0); хз зачем это окно
+    //namedWindow(trackbarWindow_blue, 0);
+    namedWindow(thresholdWindow_pink, 0);
     namedWindow(thresholdWindow_blue, 0);
     namedWindow(thresholdWindow_red, 0);
 
@@ -95,8 +94,6 @@ int main(int argc, char **argv) {
     }
     /*цикл чтения с камеры*/
     while (1) {
-
-        
         // Capture frame-by-frame
         cap >> frame;
 
@@ -121,42 +118,37 @@ int main(int argc, char **argv) {
 	    
         inRange(blurred, Scalar(blue_hmin, blue_smin, blue_vmin), Scalar(blue_hmax, blue_smax, blue_vmax), threshold_blue);
         for(int y = 0; y < threshold_blue.rows; y++){
-		    for(int x = 0; x < threshold_blue.cols; x++){
-			    int value = threshold_blue.at<uchar>(y, x);
-			    if(value == 255){
-				    Rect rect;
-				    int count = floodFill(threshold_blue, Point(x, y), Scalar(200), &rect);
-                    /* а че это они тут вместе считаются? м? почему координаты двух цветов считаются вместе? думайте!  */
-                    
+	    for(int x = 0; x < threshold_blue.cols; x++){
+	    	int value = threshold_blue.at<uchar>(y, x);
+		if (value == 255){
+		    Rect rect;
+		    int count = floodFill(threshold_blue, Point(x, y), Scalar(200), &rect);
                     Xc_blue += x;
                     Yc_blue += y;
                     counter_blue++;
-				    if(rect.width >= min && rect.width <= max
-					    && rect.height >= min && rect.height <= max)
+			
+	            if (rect.width >= min && rect.width <= max && rect.height >= min && rect.height <= max)
                     {
-					    rectangle(frame, rect, Scalar(255, 0, 0, 4));
+		        rectangle(frame, rect, Scalar(255, 0, 0, 4));
                     }
                 }
             }
         }
         
         inRange(blurred, Scalar(pink_hmin, pink_smin, pink_vmin), Scalar(pink_hmax, pink_smax, pink_vmax), threshold_pink);
-
         for(int y = 0; y < threshold_pink.rows; y++){
-		    for(int x = 0; x < threshold_pink.cols; x++){
-			    int value = threshold_pink.at<uchar>(y, x);
-			    if(value == 255){
-				    Rect rect;
-				    int count = floodFill(threshold_pink, Point(x, y), Scalar(200), &rect);
-                    Xc_pink += x;
-                    Yc_pink += y;
-                    counter_pink++;
-                    /* а че это они тут вместе считаются? м? почему координаты двух цветов считаются вместе? думайте!  */
-
-				    if(rect.width >= min && rect.width <= max
-					    && rect.height >= min && rect.height <= max)
+	    for(int x = 0; x < threshold_pink.cols; x++){
+                 int value = threshold_pink.at<uchar>(y, x);
+		 if (value == 255){
+	             Rect rect;
+		     int count = floodFill(threshold_pink, Point(x, y), Scalar(200), &rect);
+                     Xc_pink += x;
+                     Yc_pink += y;
+                     counter_pink++;
+                    
+		    if (rect.width >= min && rect.width <= max && rect.height >= min && rect.height <= max)
                     {
-					    rectangle(frame, rect, Scalar(255, 0, 255, 4));
+		        rectangle(frame, rect, Scalar(255, 0, 255, 4));
                     }
                 }
             }
@@ -164,20 +156,18 @@ int main(int argc, char **argv) {
 
         inRange(blurred, Scalar(red_hmin, red_smin, red_vmin), Scalar(red_hmax, red_smax, red_vmax), threshold_red);
         for(int y = 0; y < threshold_red.rows; y++){
-		    for(int x = 0; x < threshold_red.cols; x++){
-			    int value = threshold_red.at<uchar>(y, x);
-			    if(value == 255){
-				    Rect rect;
-				    int count = floodFill(threshold_red, Point(x, y), Scalar(200), &rect);
-                    /* а че это они тут вместе считаются? м? почему координаты двух цветов считаются вместе? думайте!  */
-                    
+	    for(int x = 0; x < threshold_red.cols; x++){
+		int value = threshold_red.at<uchar>(y, x);
+		if (value == 255){
+		    Rect rect;
+		    int count = floodFill(threshold_red, Point(x, y), Scalar(200), &rect);
                     Xc_red += x;
                     Yc_red += y;
                     counter_red++;
-				    if(rect.width >= min && rect.width <= max
-					    && rect.height >= min && rect.height <= max)
+			
+		    if (rect.width >= min && rect.width <= max && rect.height >= min && rect.height <= max)
                     {
-					    rectangle(frame, rect, Scalar(255, 255, 0, 4));
+			rectangle(frame, rect, Scalar(255, 255, 0, 4));
                     }
                 }
             }
