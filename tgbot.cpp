@@ -1,28 +1,22 @@
 #include <iostream>
 #include <cstring>
-#include <string>
-#include <stdio.h>
+#include <tgbot/tgbot.h>
 #include <mosquitto.h>
-#include <json-c/json.h>
-#include <pthread.h>
 
 using namespace std;
 
+const string BOT_TOKEN = "6092622281:AAEzaSMdLB4LaKGzP23sEmAdfTYgL6IqeKc";
+const string MQTT_TOPIC = "tgbot_topic";
+const long long CHAT_ID = 1372293216;
+const string MQTT_SERVER_ADDRESS = "localhost";
+const int MQTT_SERVER_PORT = 1883;
 
+struct mosquitto* mosq = mosquitto_new(NULL, true, NULL);
 
-//---------------- методы mosquitto_sub ----------------//
-void on_connect(struct mosquitto* mosq, void* obj, int rc) {
-    printf("ID: %d\n", *(int*)obj);
-    if (rc) {
-        printf("Error with result code: %d\n", rc);
-        exit(-1);
-    }
-    mosquitto_subscribe(mosq, NULL, "test/t1", 0);
+void on_message(struct mosquitto* mosq, void* userdata, const struct mosquitto_message* message) {
+    cout << (char*)message->payload << endl;
 }
 
-void on_message(struct mosquitto* mosq, void* obj, const struct mosquitto_message* msg) {
-    printf("New message with topic %s: %s\n", msg->topic, (char*)msg->payload);
-}
 //---------------- состояния робота ----------------//
 
 enum class Rob_State {
@@ -37,12 +31,12 @@ Rob_State state = Rob_State::Start;
 
 //---------------- класс команд, отправляемых роботу ----------------//
 
-class Sender {
+class My_Sender {
 public:
-    Sender() {
+    My_Sender() {
 
     }
-    
+
     int get_angle()
     {
         int temp;
@@ -59,13 +53,7 @@ public:
         return temp;
     }
 
-    bool command_tg()
-    {
-        bool temp;
-        cout << "Есть ли команда от тг бота?\n";
-        cin >> temp;
-        return temp;
-    }
+    
 
     bool state_drink()
     {
@@ -103,16 +91,16 @@ public:
         cin >> temp;
         return temp;
     }
-    ~Sender() {
+    ~My_Sender() {
 
     }
 };
 
 //---------------- класс выводимых сообщений ----------------//
 
-class Messages {
+class My_Messages {
 public:
-    Messages() {
+    My_Messages() {
 
     }
     void CMD_Rotate_and_Move(int a, int d) {
@@ -128,14 +116,14 @@ public:
     void CMD_Start_point() {
         cout << "Робот в стартовом состоянии" << endl;
     }
-    ~Messages() {
+    ~My_Messages() {
 
     }
 };
 
-void ProcessFiniteAutomat(Messages & message, Sender & send)
+void ProcessFiniteAutomat(My_Messages& message, My_Sender& send)
 {
-    
+
     switch (state)
     {
 
@@ -147,17 +135,12 @@ void ProcessFiniteAutomat(Messages & message, Sender & send)
         case 0:
             exit(0);
         default:
-            if (send.command_tg())
-            {
+            
                 state = Rob_State::To_Dispenser;
                 break;
-            }
-            else {
-                state = Rob_State::Start;
-                break;
-            }
+            
         }
-        
+
     }
 
     case Rob_State::Delivery:
@@ -214,7 +197,7 @@ void ProcessFiniteAutomat(Messages & message, Sender & send)
             state = Rob_State::To_Dispenser;
             break;
         }
-       if (!send.delivery()) {  // флаг доехал ли робот до студента
+        if (!send.delivery()) {  // флаг доехал ли робот до студента
             cout << "Условие доставки\n";
             state = Rob_State::Delivery;
             break;
@@ -234,24 +217,60 @@ void ProcessFiniteAutomat(Messages & message, Sender & send)
             cout << "Условие движения\n";
             state = Rob_State::Rotate_and_Move;
             break;
-        } 
+        }
         state = Rob_State::Start;
         break;
     }
     }
-   
+
 }
 
-int main()
+My_Messages my_message;
+My_Sender my_send;
+
+int main(int argc, char* argv[])
 {
     setlocale(LC_ALL, "Rus");
-    Messages message;
-    Sender send;
-    while(1)ProcessFiniteAutomat(message, send);
-
-//---------------- работа mosquitto_sub  ----------------//
-    mosquitto_lib_init();
     
+    
+
+    TgBot::Bot bot(BOT_TOKEN);
+    mosquitto_lib_init();
+    mosquitto_connect(mosq, MQTT_SERVER_ADDRESS.c_str(), MQTT_SERVER_PORT, 0);
+    mosquitto_subscribe(mosq, NULL, MQTT_TOPIC.c_str(), 0);
+   
+    bot.getEvents().onAnyMessage([&bot](TgBot::Message::Ptr message) {
+        
+        if (message->text == "start") {
+            bot.getApi().sendMessage(message->chat->id, "Hi! I'm Petya, delivering beer and troubles. I'm coming to you with a drink");
+            while(true)ProcessFiniteAutomat(my_message, my_send);
+            return;
+        }
+        bot.getApi().sendMessage(message->chat->id, "You've written " + message->text + ", but I don't care");
+     
+        mosquitto_publish(mosq, NULL, MQTT_TOPIC.c_str(), message->text.length(), message->text.c_str(), 0, false);
+       
+        });
+    
+    try {
+        TgBot::TgLongPoll longPoll(bot);
+        while (true) {
+            longPoll.start();
+        }
+    }
+    catch (TgBot::TgException& e) {
+        printf("error: %s\n", e.what());
+    }
+    
+    // Запускаем телеграм-бота
+    bot.getApi().deleteWebhook();
+   
+    // Отключаемся от брокера и освобождаем ресурсы
+    mosquitto_disconnect(mosq);
+    mosquitto_destroy(mosq);
+    mosquitto_lib_cleanup();
     return 0;
+
+
 
 }
