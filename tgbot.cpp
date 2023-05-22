@@ -15,10 +15,11 @@ const int MQTT_SERVER_PORT = 1883;
 
 struct mosquitto* mosq = mosquitto_new(NULL, true, NULL);
 
+
 bool flag = false;
 bool password_flag = false;
 string password = "1234";
-My_Sender my_send; 
+
 bool first = false;
 
 void on_message(struct mosquitto* mosq, void* obj, const struct mosquitto_message* message) {
@@ -32,18 +33,20 @@ void message(double angle, double dist) {
     dist = round(dist * 10);
     string str_angle = to_string(angle);
     string str_dist = to_string(dist);
+
+    string cmd;
     
     if (angle >= 0) {
-        string cmd = "{\"cmd\":\"right\",\"val\":" + str_angle + ", \"spd\":0.6}";
+        cmd = "{\"cmd\":\"right\",\"val\":" + str_angle + ", \"spd\":0.6}";
         mosquitto_publish(mosq, NULL, MQTT_TOPIC.c_str(), cmd.length(), cmd.c_str(), 0, false);
-        string cmd = "{\"cmd\":\"forward\",\"val\":" + str_dist + ", \"spd\":0.6}";
+        cmd = "{\"cmd\":\"forward\",\"val\":" + str_dist + ", \"spd\":0.6}";
         mosquitto_publish(mosq, NULL, MQTT_TOPIC.c_str(), cmd.length(), cmd.c_str(), 0, false);
     }
 
     if (angle < 0) {
-        string cmd = "{\"cmd\":\"left\",\"val\":" + str_angle + ", \"spd\":0.6}";
+        cmd = "{\"cmd\":\"left\",\"val\":" + str_angle + ", \"spd\":0.6}";
         mosquitto_publish(mosq, NULL, MQTT_TOPIC.c_str(), cmd.length(), cmd.c_str(), 0, false);
-        string cmd = "{\"cmd\":\"forward\",\"val\":" + str_dist + ", \"spd\":0.6}";
+        cmd = "{\"cmd\":\"forward\",\"val\":" + str_dist + ", \"spd\":0.6}";
         mosquitto_publish(mosq, NULL, MQTT_TOPIC.c_str(), cmd.length(), cmd.c_str(), 0, false);
     }
 }
@@ -143,9 +146,7 @@ void ProcessFiniteAutomat(My_Sender& sender, TgBot::Bot& bot)
    
 }
 
-
-
-
+My_Sender my_send;
 
 int main(int argc, char* argv[])
 {
