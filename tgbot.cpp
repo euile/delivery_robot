@@ -25,6 +25,29 @@ void on_message(struct mosquitto* mosq, void* obj, const struct mosquitto_messag
     cout << (char*)message->payload << endl;
 }
 
+// ОТПРАВКА КОМАНДЫ РОБОТУ
+
+void message(double angle, double dist) {
+    angle = round(angle * 10);
+    dist = round(dist * 10);
+    string str_angle = to_string(angle);
+    string str_dist = to_string(dist);
+    
+    if (angle >= 0) {
+        string cmd = "{\"cmd\":\"right\",\"val\":" + str_angle + ", \"spd\":0.6}";
+        mosquitto_publish(mosq, NULL, MQTT_TOPIC.c_str(), cmd.length(), cmd.c_str(), 0, false);
+        string cmd = "{\"cmd\":\"forward\",\"val\":" + str_dist + ", \"spd\":0.6}";
+        mosquitto_publish(mosq, NULL, MQTT_TOPIC.c_str(), cmd.length(), cmd.c_str(), 0, false);
+    }
+
+    if (angle < 0) {
+        string cmd = "{\"cmd\":\"left\",\"val\":" + str_angle + ", \"spd\":0.6}";
+        mosquitto_publish(mosq, NULL, MQTT_TOPIC.c_str(), cmd.length(), cmd.c_str(), 0, false);
+        string cmd = "{\"cmd\":\"forward\",\"val\":" + str_dist + ", \"spd\":0.6}";
+        mosquitto_publish(mosq, NULL, MQTT_TOPIC.c_str(), cmd.length(), cmd.c_str(), 0, false);
+    }
+}
+
 //---------------- состояния робота ----------------//
 
 enum class Rob_State {
@@ -41,10 +64,10 @@ class My_Sender {
 public:
     My_Sender() {}
 
-
+/*
     vector <vector <double> > angles_dists()
     {
-        /*
+        
         vector<vector<double>> all_data;
         cout << "Введите угол поворота и расстояние до места старта\n";
         double a, b; cin >> a >> b;
@@ -58,10 +81,10 @@ public:
         cin >> a >> b;
         temp = { a, b };
         all_data.push_back(temp);
-        */
+        
         return coords();
     }
-
+*/
     ~My_Sender() {}
 };
 
@@ -79,6 +102,7 @@ void ProcessFiniteAutomat(My_Sender& sender, TgBot::Bot& bot)
             while (abs(current_data[1][0]) > 0.1 || current_data[1][1] > 0.1)  // угол и расст
             {
                 current_data = coords();
+                message(current_data[1][0], current_data[1][1]);
                 bot.getApi().sendMessage(CHAT_ID, "I'm going to the dispenser");
                 
             }
@@ -93,6 +117,7 @@ void ProcessFiniteAutomat(My_Sender& sender, TgBot::Bot& bot)
             while (abs(current_data[2][0]) > 0.1 || current_data[2][1] > 0.1)
             {
                 current_data = coords();
+                message(current_data[2][0], current_data[2][1]);
                 bot.getApi().sendMessage(CHAT_ID, "Going to the student");
             }
             bot.getApi().sendMessage(CHAT_ID, "Got to the student");
@@ -106,6 +131,7 @@ void ProcessFiniteAutomat(My_Sender& sender, TgBot::Bot& bot)
             while (abs(current_data[0][0]) > 0.1 || current_data[0][1] > 0.1)
             {
                 current_data = coords();
+                message(current_data[0][0], current_data[0][1]);
                 bot.getApi().sendMessage(CHAT_ID, "Going to the start point");
                 
             }
