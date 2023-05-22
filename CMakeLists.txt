@@ -1,6 +1,12 @@
-cmake_minimum_required(VERSION 2.8)
-project( main )
-find_package( OpenCV REQUIRED )
+cmake_minimum_required(VERSION 3.0)
+project( robot )
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(Mosquitto IMPORTED_TARGET libmosquitto REQUIRED)
+
+find_package(json-c CONFIG)
+
+find_package( OpenCV REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
-add_executable( main main.cpp main_Robot.cpp)
-target_link_libraries( main ${OpenCV_LIBS} )
+add_executable( robot tg.cpp main.cpp )
+target_link_libraries( main PkgConfig::Mosquitto json-c::json-c ${OpenCV_LIBS} )
