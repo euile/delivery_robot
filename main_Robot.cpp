@@ -1,4 +1,5 @@
 #include "opencv2/opencv.hpp"
+#include "main_Robot.h"
 #include <iostream>
 #include <math.h>
 #include <vector>
@@ -8,7 +9,8 @@ using namespace cv;
 
 // Вывод в формате all_data = [["угол до старта", "dist до старта"], ["угол до доз", "dist до доз"], ["угол до пуф", "dist до пуф"]]
 
-int main(int argc, char **argv) {
+
+vector<vector<double>> coords() {
 
     //char mainWindow[] = "Main";
 	//char trackbarWindow_blue[] = "Trackbar_pink";
@@ -34,16 +36,17 @@ int main(int argc, char **argv) {
     //Создаем окна
 	//namedWindow(mainWindow, 0); хз зачем это окно
 	//namedWindow(trackbarWindow_blue, 0);
-	namedWindow(thresholdWindow_pink, 0);
-    namedWindow(thresholdWindow_blue, 0);
-    namedWindow(thresholdWindow_yellow, 0);
+	//namedWindow(thresholdWindow_pink, 0);
+    //namedWindow(thresholdWindow_blue, 0);
+    //namedWindow(thresholdWindow_yellow, 0);
 
     // Check if camera opened successfully
     if (!cap.isOpened()) {
         cout << "Error opening video stream or file" << endl;
-        return -1;
+        //return -1;
     }
     /*цикл чтения с камеры*/
+    vector <vector<double>> all_data = {{307, 307}, {307, 307}, {307, 307}};
     while (1) {      
         // Capture frame-by-frame
         cap >> frame;
@@ -138,7 +141,7 @@ int main(int argc, char **argv) {
         cout << pink_hmin << ' ' << pink_hmax << ' ' << pink_smin <<' ' << pink_smax << ' ' << pink_vmin << ' ' << pink_vmax << endl;
         cout << blue_hmin << ' ' << blue_hmax << ' ' << blue_smin << ' ' << blue_smax << ' ' << blue_vmin << ' ' << blue_vmax << endl;
         */
-        vector <vector<double>> all_data;
+        
         if (counter_pink != 0 && counter_blue != 0 && counter_yellow != 0)
         {
             double x1 = double(Xc_pink) / counter_pink - double(Xc_blue) / counter_blue; // Px - Bx
@@ -171,29 +174,35 @@ int main(int argc, char **argv) {
             {
                 if (i == 0)
                 {
-                    vector <double> temp = {acos(cos_to_start), dist_to_start};
-                    cout << acos(cos_to_start) << "\t" << dist_to_start;
-                    all_data.push_back(temp);
+                    //vector <double> temp = {acos(cos_to_start), dist_to_start};
+                    //cout << acos(cos_to_start) << "\t" << dist_to_start;
+                    all_data[0][0] = acos(cos_to_start); 
+                    all_data[0][1] = dist_to_start;
+
                 } else if (i == 1)
                 {
-                    vector <double> temp = {acos(cos_to_disp), dist_to_disp};
-                    cout << acos(cos_to_disp) << "\t" << dist_to_disp;
-                    all_data.push_back(temp);
+                    //vector <double> temp = {acos(cos_to_disp), dist_to_disp};
+                    //cout << acos(cos_to_disp) << "\t" << dist_to_disp;
+                    all_data[1][0] = acos(cos_to_disp); 
+                    all_data[1][1] = dist_to_disp;
                 } else 
                 {
-                    vector <double> temp = {acos(cos_to_puf), dist_to_puf};
-                    cout << acos(cos_to_puf) << "\t" << dist_to_puf;
-                    all_data.push_back(temp);
+                    //vector <double> temp = {acos(cos_to_puf), dist_to_puf};
+                    //cout << acos(cos_to_puf) << "\t" << dist_to_puf;
+                    all_data[2][0] = acos(cos_to_puf); 
+                    all_data[2][1] = dist_to_puf;
+                    //all_data.push_back(temp);
                 }
             }
-            cout << endl;
+            break;
         }
         
         // Display the resulting frame
-        imshow("Frame", frame);
-        imshow(thresholdWindow_pink, threshold_pink);
-        imshow(thresholdWindow_blue, threshold_blue);
-        imshow(thresholdWindow_yellow, threshold_yellow);
+        //imshow("Frame", frame);
+        //imshow(thresholdWindow_pink, threshold_pink);
+        //imshow(thresholdWindow_blue, threshold_blue);
+        //imshow(thresholdWindow_yellow, threshold_yellow);
+
         // Press  ESC on keyboard to exit
         char c = (char)waitKey(25);
         if (c == 27)
@@ -205,6 +214,19 @@ int main(int argc, char **argv) {
 
     // Closes all the frames
     destroyAllWindows();
+    
+    return all_data;    
+}
 
+int main()
+{
+    vector<vector<double>> a = coords();
+    for (auto elem: a)
+    {
+        for (auto el: elem)
+        {
+            cout << el << ' ';
+        }
+    }
     return 0;
 }
