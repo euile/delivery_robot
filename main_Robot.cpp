@@ -1,11 +1,5 @@
-#include "opencv2/opencv.hpp"
 #include "main_Robot.h"
-#include <iostream>
-#include <math.h>
-#include <vector>
 
-using namespace std;
-using namespace cv;
 
 // Вывод в формате all_data = [["угол до старта", "dist до старта"], ["угол до доз", "dist до доз"], ["угол до пуф", "dist до пуф"]]
 
@@ -217,7 +211,7 @@ vector<vector<double>> coords() {
     
     return all_data;    
 }
-
+/*
 int main()
 {
     vector<vector<double>> a = coords();
@@ -230,3 +224,4 @@ int main()
     }
     return 0;
 }
+*/
