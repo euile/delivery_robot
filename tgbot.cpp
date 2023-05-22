@@ -3,6 +3,7 @@
 #include <tgbot/tgbot.h>
 #include <mosquitto.h>
 #include <Windows.h>
+#include "main_Robot.h"
 
 using namespace std;
 
@@ -43,6 +44,7 @@ public:
 
     vector <vector <double> > angles_dists()
     {
+        /*
         vector<vector<double>> all_data;
         cout << "Введите угол поворота и расстояние до места старта\n";
         double a, b; cin >> a >> b;
@@ -56,7 +58,8 @@ public:
         cin >> a >> b;
         temp = { a, b };
         all_data.push_back(temp);
-        return all_data;
+        */
+        return coords();
     }
 
     ~My_Sender() {}
@@ -72,10 +75,10 @@ void ProcessFiniteAutomat(My_Sender& sender, TgBot::Bot& bot)
         {
         case Rob_State::Start:
         {
-            vector <vector<double>> current_data = sender.angles_dists();
+            vector <vector<double>> current_data = coords();
             while (abs(current_data[1][0]) > 0.1 || current_data[1][1] > 0.1)  // угол и расст
             {
-                current_data = sender.angles_dists();
+                current_data = coords();
                 bot.getApi().sendMessage(CHAT_ID, "I'm going to the dispenser");
                 
             }
@@ -86,10 +89,10 @@ void ProcessFiniteAutomat(My_Sender& sender, TgBot::Bot& bot)
         {
             bot.getApi().sendMessage(CHAT_ID, "Waiting for the preparation of the drink! This will take 20 seconds");
             Sleep(5000);
-            vector <vector<double>> current_data = sender.angles_dists();
+            vector <vector<double>> current_data = coords();
             while (abs(current_data[2][0]) > 0.1 || current_data[2][1] > 0.1)
             {
-                current_data = sender.angles_dists();
+                current_data = coords();
                 bot.getApi().sendMessage(CHAT_ID, "Going to the student");
             }
             bot.getApi().sendMessage(CHAT_ID, "Got to the student");
@@ -99,10 +102,10 @@ void ProcessFiniteAutomat(My_Sender& sender, TgBot::Bot& bot)
         {
             bot.getApi().sendMessage(CHAT_ID, "Waiting 20 seconds for you to pick up the drink");
             Sleep(5000);
-            vector <vector<double>> current_data = sender.angles_dists();
+            vector <vector<double>> current_data = coords();
             while (abs(current_data[0][0]) > 0.1 || current_data[0][1] > 0.1)
             {
-                current_data = sender.angles_dists();
+                current_data = coords();
                 bot.getApi().sendMessage(CHAT_ID, "Going to the start point");
                 
             }
