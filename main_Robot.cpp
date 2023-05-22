@@ -176,20 +176,20 @@ vector<vector<double>> coords() {
                 {
                     //vector <double> temp = {acos(cos_to_start), dist_to_start};
                     //cout << acos(cos_to_start) << "\t" << dist_to_start;
-                    all_data[0][0] = acos(cos_to_start); 
+                    all_data[0][0] = cos(cos_to_start); // НУЖНО ЛИ ВООБЩЕ ПИСАТЬ МЕТОД COS??? МОЖЕТ ПРОСТО ПЕРЕДАВАТЬ СРАЗУ КОСИНУС?
                     all_data[0][1] = dist_to_start;
 
                 } else if (i == 1)
                 {
                     //vector <double> temp = {acos(cos_to_disp), dist_to_disp};
                     //cout << acos(cos_to_disp) << "\t" << dist_to_disp;
-                    all_data[1][0] = acos(cos_to_disp); 
+                    all_data[1][0] = cos(cos_to_disp); 
                     all_data[1][1] = dist_to_disp;
                 } else 
                 {
                     //vector <double> temp = {acos(cos_to_puf), dist_to_puf};
                     //cout << acos(cos_to_puf) << "\t" << dist_to_puf;
-                    all_data[2][0] = acos(cos_to_puf); 
+                    all_data[2][0] = cos(cos_to_puf); 
                     all_data[2][1] = dist_to_puf;
                     //all_data.push_back(temp);
                 }
