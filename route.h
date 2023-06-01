@@ -7,4 +7,4 @@
 using namespace std;
 using namespace cv;
 
-vector<vector<double>> coords();
+vector<vector <double>> coords();
